@@ -54,3 +54,6 @@ def menu_get():
 
     for line in menu:
         print(line)
+        
+        
+menu_get()
