@@ -1,13 +1,16 @@
-
 import lxml
+from firebase import firebase
+FBConn = firebase.FirebaseApplication('https://dazzling-forest-311718-default-rtdb.firebaseio.com/', None)
+
 import requests
 from bs4 import BeautifulSoup
 
-def menu_get():
-    first = requests.get("https://wesleyan.cafebonappetit.com/cafe/the-marketplace-at-usdan/")
-    src0 = first.content
-    soup0 = BeautifulSoup(src0, 'lxml')
 
+first = requests.get("https://wesleyan.cafebonappetit.com/cafe/the-marketplace-at-usdan/")
+src0 = first.content
+soup0 = BeautifulSoup(src0, 'lxml')
+
+def get_menu():
     for a_tag in soup0.find_all('a', class_ = "hidden-small"):
         link = a_tag.attrs['href']
         #print(link)
@@ -17,7 +20,6 @@ def menu_get():
     soup = BeautifulSoup(src, 'lxml')
 
     menu = [[]]
-    pnt = False
     daykey = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     statkey = {
         '4260' : "Stockpot",
@@ -32,6 +34,17 @@ def menu_get():
 
     }
     menu_counter = 1
+
+    menu_dict = {
+        "Monday" : [],
+        "Tuesday" : [],
+        "Wednesday" : [],
+        "Thursday" : [],
+        "Friday" : [],
+        "Saturday" : [],
+        "Sunday" : []
+
+    }
     for div_tag in soup.find_all('div', class_ = "day cell_menu_item"):
         address = div_tag.attrs['id']
         address = address.split("-")
@@ -50,10 +63,15 @@ def menu_get():
 
     del menu[0]
 
+    for list in menu:
+        for day in daykey:
+            if list[1] == day:
+                menu_dict[day].append(list)
 
 
-    for line in menu:
-        print(line)
-        
-        
-menu_get()
+    result =  FBConn.post('menu_items',menu_dict)
+    print(result)
+    # for line in menu:
+    #     print(line)
+
+get_menu()
